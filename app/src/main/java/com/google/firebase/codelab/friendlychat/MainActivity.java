@@ -192,9 +192,38 @@ public class MainActivity extends AppCompatActivity
 
                 viewHolder.messageTextView.setText(model.getText());
                 viewHolder.messengerTextView.setText(model.getName());
-                
+
+                if(model.getPhotoUrl() == null)
+                {
+                    viewHolder.messengerImageView.setImageResource(
+                            R.drawable.ic_account_circle_black_36dp);
+                }
+                else
+                {
+                    Glide.with(MainActivity.this).load(model.getPhotoUrl()).into(viewHolder.messengerImageView);
+                }
             }
         };
+
+        mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
+        {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount)
+            {
+                super.onItemRangeInserted(positionStart, itemCount);
+
+                int messageCount = mFirebaseAdapter.getItemCount();
+                int lastVisiblePosition = mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
+
+                if(lastVisiblePosition == -1 || (positionStart >= (messageCount - 1)) && lastVisiblePosition == (positionStart - 1))
+                {
+                    mMessageRecyclerView.scrollToPosition(positionStart);
+                }
+            }
+        });
+
+        mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mMessageRecyclerView.setAdapter(mFirebaseAdapter);
     }
 
     @Override
