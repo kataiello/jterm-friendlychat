@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity
     // Firebase instance variables
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
+    private DatabaseReference mFirebaseDatabaseReference;
+    private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder> mFirebaseAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         mLinearLayoutManager.setStackFromEnd(true);
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
 
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+        configureFirebaseAdapter();
 
         mMessageEditText = (EditText) findViewById(R.id.messageEditText);
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mSharedPreferences
@@ -176,6 +178,23 @@ public class MainActivity extends AppCompatActivity
                 // Send messages on click.
             }
         });
+    }
+
+    private void configureFirebaseAdapter()
+    {
+        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(
+                FriendlyMessage.class, R.layout.item_message, MessageViewHolder.class, mFirebaseDatabaseReference.child(MESSAGES_CHILD)
+        ) {
+            @Override
+            protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage model, int position) {
+                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+
+                viewHolder.messageTextView.setText(model.getText());
+                viewHolder.messengerTextView.setText(model.getName());
+                
+            }
+        };
     }
 
     @Override
